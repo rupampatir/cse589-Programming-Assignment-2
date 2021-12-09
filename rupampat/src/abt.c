@@ -126,7 +126,7 @@ void A_init() {
   buffered_messages = NULL;
   seqnum_A = 0;
   acknum_B = 0;
-  TIMEOUT = 20;
+  TIMEOUT = 50;
 }
 
 /* Note that with simplex transfer from a-to-B, there is no B_output() */

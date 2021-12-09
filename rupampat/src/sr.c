@@ -102,12 +102,20 @@ void A_output(message)
     struct pkt next_packet;
     next_packet.seqnum = nextseqnum;
     next_packet.acknum = nextseqnum;
-    memcpy(next_packet.payload, message.data, sizeof(message.data));
+    int i;
+    for (i=0; i<20; i++) {
+      next_packet.payload[i] = message.data[i];
+    }
+    next_packet.payload[i] = '\0';
+    // memcpy(next_packet.payload, message.data, sizeof(message.data));
     next_packet.checksum = create_checksum(next_packet);
     if (global_logical_timer == NULL) {
       global_logical_timer = malloc(sizeof(struct timer));
       global_logical_timer->seqnum = nextseqnum;
       global_logical_timer->absolute_interrupt_time = get_sim_time() + TIMEOUT;
+      if (timerrunning==1) {
+        stoptimer(A);
+      }
       starttimer(A, global_logical_timer->absolute_interrupt_time - get_sim_time());
       timerrunning=1;
       // printf("A: Timeout: %f\n", global_logical_timer->absolute_interrupt_time);
@@ -197,7 +205,12 @@ void A_timerinterrupt()
         struct pkt next_packet;
         next_packet.seqnum = seqnum;
         next_packet.acknum = seqnum;
-        memcpy(next_packet.payload, (temp_msg->message).data, sizeof((temp_msg->message).data));
+        int i;
+        for (i=0; i<20; i++) {
+          next_packet.payload[i] =  (temp_msg->message).data[i];
+        }
+        next_packet.payload[i] = '\0';
+        // memcpy(next_packet.payload, (temp_msg->message).data, sizeof((temp_msg->message).data));
         next_packet.checksum = create_checksum(next_packet);
         // printf("A: RESENDING %d\n", next_packet.seqnum);
         tolayer3(A, next_packet);
@@ -240,7 +253,7 @@ void A_init()
   buffered_messages_A = NULL;
   seqnum_A = 0;
   acknum_B = 0;
-  TIMEOUT = 60;
+  TIMEOUT = 20;
   WINDOWSIZE = getwinsize();
   nextseqnum = 0;
   base = 0;
@@ -284,7 +297,12 @@ void B_input(packet)
     if (temp != NULL) {
       struct buffer *new_msg = malloc(sizeof(struct buffer));
       struct msg m;
-      memcpy(m.data, packet.payload, sizeof(m.data));
+      int i;
+      for (i=0; i<20; i++) {
+        m.data[i] =  packet.payload[i];
+      }
+      m.data[i] = '\0';
+      // memcpy(m.data, packet.payload, sizeof(m.data));
       new_msg->message = m;
       new_msg->seqnum = packet.seqnum;
 
@@ -324,7 +342,12 @@ void B_input(packet)
         exit(0);
       }
       struct msg m;
-      memcpy(m.data, packet.payload, sizeof(m.data));
+      int i;
+      for (i=0; i<20; i++) {
+        m.data[i] = packet.payload[i];
+      }
+      m.data[i] = '\0';
+      // memcpy(m.data, packet.payload, sizeof(m.data));
       buffered_messages_B->message = m;
       buffered_messages_B->next_message = NULL;
       buffered_messages_B->seqnum = packet.seqnum;

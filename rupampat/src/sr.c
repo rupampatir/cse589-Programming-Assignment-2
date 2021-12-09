@@ -220,6 +220,7 @@ void A_timerinterrupt()
             temp = temp->next_timer;
           }
           temp->next_timer = malloc(sizeof(struct timer));
+          temp->next_timer-next_timer = NULL;
           temp->next_timer->seqnum = seqnum;
           temp->next_timer->absolute_interrupt_time = get_sim_time() + TIMEOUT;
           printf("TIMEOUTOFFSET %f\n",temp->next_timer->absolute_interrupt_time - get_sim_time());

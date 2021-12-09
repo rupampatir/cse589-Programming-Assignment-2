@@ -127,7 +127,7 @@ void A_output(message)
       }
       temp_timer->next_timer = malloc(sizeof(struct timer));
       temp_timer->next_timer->seqnum = nextseqnum;
-      temp_timer->next_timer->next_timer = NULL
+      temp_timer->next_timer->next_timer = NULL;
       temp_timer->next_timer->absolute_interrupt_time = get_sim_time() + TIMEOUT;
       // printf("A: Timeout: %f\n", global_logical_timer->next_timer->absolute_interrupt_time);
     }

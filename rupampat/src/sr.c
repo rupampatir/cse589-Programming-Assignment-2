@@ -234,6 +234,7 @@ void A_timerinterrupt()
         } else {
           global_logical_timer = malloc(sizeof(struct timer));
           global_logical_timer->seqnum = seqnum;
+          global_logical_timer->next_timer = NULL;
           global_logical_timer->absolute_interrupt_time = get_sim_time() + TIMEOUT;
           // printf("TIMEOUTOFFSET %f\n",global_logical_timer->absolute_interrupt_time - get_sim_time());
         }

@@ -77,7 +77,7 @@ void A_output(message)
     }
     temp->next_message = malloc(sizeof(struct buffer));
     if (temp->next_message == NULL) {
-      printf("Not enough memory\n");
+      // printf("Not enough memory\n");
       exit(0);
     }
     temp->next_message->message = message;
@@ -88,7 +88,7 @@ void A_output(message)
   } else {
     buffered_messages_A = malloc(sizeof(struct buffer));
     if (buffered_messages_A == NULL) {
-      printf("Not enough memory\n");
+      // printf("Not enough memory\n");
       exit(0);
     }
     buffered_messages_A->message = message;
@@ -112,13 +112,14 @@ void A_output(message)
     if (global_logical_timer == NULL) {
       global_logical_timer = malloc(sizeof(struct timer));
       global_logical_timer->seqnum = nextseqnum;
+      global_logical_timer->next_timer = NULL;
       global_logical_timer->absolute_interrupt_time = get_sim_time() + TIMEOUT;
       if (timerrunning==1) {
         stoptimer(A);
       }
       starttimer(A, global_logical_timer->absolute_interrupt_time - get_sim_time());
       timerrunning=1;
-      printf("A: Timeout: %f\n", global_logical_timer->absolute_interrupt_time);
+      // printf("A: Timeout: %f\n", global_logical_timer->absolute_interrupt_time);
 
     } else {
       struct timer *temp_timer = global_logical_timer;
@@ -129,12 +130,17 @@ void A_output(message)
       temp_timer->next_timer->seqnum = nextseqnum;
       temp_timer->next_timer->next_timer = NULL;
       temp_timer->next_timer->absolute_interrupt_time = get_sim_time() + TIMEOUT;
-      printf("A: Timeout: %f\n", global_logical_timer->next_timer->absolute_interrupt_time);
+      // printf("A: Timeout: %f\n", global_logical_timer->next_timer->absolute_interrupt_time);
     }
     tolayer3(A, next_packet);
-    printf("A: Sending message \"%s\" with Sequence: %d\n", message.data, nextseqnum);
+    // printf("A: Sending message \"%s\" with Sequence: %d\n", message.data, nextseqnum);
   }
   nextseqnum++;
+  struct timer *temp2 = global_logical_timer;
+  while(temp2 != NULL) {
+    // printf("TIME %f %d\n",temp2->absolute_interrupt_time, temp2->seqnum);
+    temp2 = temp2->next_timer;
+  }
 }
 
 /* called from layer 3, when a packet arrives for layer 4 */
@@ -144,7 +150,7 @@ void A_input(packet)
   // Ack received
 
   int checksum = create_checksum(packet);
-  printf("A: Receive ack %d %d %d %d %d\n", packet.acknum, base, nextseqnum, packet.checksum, checksum);
+  // printf("A: Receive ack %d %d %d %d %d\n", packet.acknum, base, nextseqnum, packet.checksum, checksum);
   
   // if corrupted do nothing
   if (packet.checksum != checksum || packet.acknum<base) {
@@ -167,7 +173,7 @@ void A_input(packet)
       global_logical_timer=global_logical_timer->next_timer;
     }
     buffered_messages_A = buffered_messages_A->next_message;
-    printf("Update base");
+    // printf("Update base");
     base++;
   }
   if (global_logical_timer !=NULL) {
@@ -180,7 +186,7 @@ void A_input(packet)
 
   struct timer *temp1 = global_logical_timer;
   while(temp1 != NULL) {
-    printf("TIME %f %d\n",temp1->absolute_interrupt_time, temp1->seqnum);
+    // printf("TIME %f %d\n",temp1->absolute_interrupt_time, temp1->seqnum);
     temp1 = temp1->next_timer;
   }
 }
@@ -193,7 +199,7 @@ void A_timerinterrupt()
   int current_time = get_sim_time();
   while (global_logical_timer !=NULL && global_logical_timer->absolute_interrupt_time<=get_sim_time()) {
       int seqnum = global_logical_timer->seqnum;
-      printf("A: Interrupt %d\n", seqnum);
+      // printf("A: Interrupt %d\n", seqnum);
       struct buffer *temp_msg = buffered_messages_A;
       while (temp_msg != NULL) {
         if (temp_msg->seqnum==seqnum) {
@@ -213,7 +219,7 @@ void A_timerinterrupt()
         next_packet.payload[i] = '\0';
         // memcpy(next_packet.payload, (temp_msg->message).data, sizeof((temp_msg->message).data));
         next_packet.checksum = create_checksum(next_packet);
-        printf("A: RESENDING %d\n", next_packet.seqnum);
+        // printf("A: RESENDING %d\n", next_packet.seqnum);
         tolayer3(A, next_packet);
         if (global_logical_timer != NULL) {
           struct timer *temp = global_logical_timer;
@@ -224,12 +230,12 @@ void A_timerinterrupt()
           temp->next_timer->next_timer = NULL;
           temp->next_timer->seqnum = seqnum;
           temp->next_timer->absolute_interrupt_time = get_sim_time() + TIMEOUT;
-          printf("TIMEOUTOFFSET %f\n",temp->next_timer->absolute_interrupt_time - get_sim_time());
+          // printf("TIMEOUTOFFSET %f\n",temp->next_timer->absolute_interrupt_time - get_sim_time());
         } else {
           global_logical_timer = malloc(sizeof(struct timer));
           global_logical_timer->seqnum = seqnum;
           global_logical_timer->absolute_interrupt_time = get_sim_time() + TIMEOUT;
-          printf("TIMEOUTOFFSET %f\n",global_logical_timer->absolute_interrupt_time - get_sim_time());
+          // printf("TIMEOUTOFFSET %f\n",global_logical_timer->absolute_interrupt_time - get_sim_time());
         }
     }
   }
@@ -242,7 +248,7 @@ void A_timerinterrupt()
 
   struct timer *temp = global_logical_timer;
   while(temp != NULL) {
-    printf("TIME %f %d\n",temp->absolute_interrupt_time, temp->seqnum);
+    // printf("TIME %f %d\n",temp->absolute_interrupt_time, temp->seqnum);
     temp = temp->next_timer;
   }
 }  
@@ -267,13 +273,13 @@ void A_init()
 void B_input(packet)
   struct pkt packet;
 {
-  printf("B: Receive message %s %d %d\n", packet.payload, packet.seqnum, acknum_B);
+  // printf("B: Receive message %s %d %d\n", packet.payload, packet.seqnum, acknum_B);
 
   // Check if corrupted or wrong packet
   int checksum = create_checksum(packet);
   if (packet.checksum != checksum) {
     // Do nothing
-    printf("B: Corrupted message; Do nothing");
+    // printf("B: Corrupted message; Do nothing");
     return;
   }
   struct pkt ack;
@@ -281,7 +287,7 @@ void B_input(packet)
   ack.acknum = packet.seqnum;
   ack.checksum = create_checksum(ack);
   tolayer3(B, ack);
-  printf("B: Successfully send ack %d \n", packet.seqnum);
+  // printf("B: Successfully send ack %d \n", packet.seqnum);
 
   
   
@@ -340,7 +346,7 @@ void B_input(packet)
     } else {
       buffered_messages_B = malloc(sizeof(struct buffer));
       if (buffered_messages_B == NULL) {
-        printf("Not enough memory\n");
+        // printf("Not enough memory\n");
         exit(0);
       }
       struct msg m;
@@ -355,10 +361,10 @@ void B_input(packet)
       buffered_messages_B->seqnum = packet.seqnum;
     }
   }
-  printf("STORED MESSAGES ON B\n");
+  // printf("STORED MESSAGES ON B\n");
   struct buffer *temp = buffered_messages_B;
   while (temp !=NULL) {
-    printf("%s %d\n", temp->message.data, temp->seqnum);
+    // printf("%s %d\n", temp->message.data, temp->seqnum);
     temp=temp->next_message;
   }
 }

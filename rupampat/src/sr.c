@@ -231,12 +231,12 @@ void A_timerinterrupt()
           // printf("TIMEOUTOFFSET %f\n",global_logical_timer->absolute_interrupt_time - get_sim_time());
         }
     }
-    if (global_logical_timer!=NULL) {
-      starttimer(A, global_logical_timer->absolute_interrupt_time - get_sim_time());
-      timerrunning = 1;
-    }
   }
 
+  if (global_logical_timer!=NULL) {
+    starttimer(A, global_logical_timer->absolute_interrupt_time - get_sim_time());
+    timerrunning = 1;
+  }
 
 
   struct timer *temp = global_logical_timer;

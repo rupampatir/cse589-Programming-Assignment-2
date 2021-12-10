@@ -31,7 +31,6 @@ struct buffer {
 
 enum host_states {
   waiting_for_acknowledgment,
-  waiting_for_packet,
   available
 };
 
@@ -126,7 +125,7 @@ void A_init() {
   buffered_messages = NULL;
   seqnum_A = 0;
   acknum_B = 0;
-  TIMEOUT = 50;
+  TIMEOUT = 10;
 }
 
 /* Note that with simplex transfer from a-to-B, there is no B_output() */

@@ -28,13 +28,6 @@ struct buffer {
   struct buffer * next_message;
 }* buffered_messages;
 
-enum host_states {
-  waiting_for_acknowledgment,
-  waiting_for_packet,
-  available
-};
-
-enum host_states state_A = available;
 int seqnum_A;
 int acknum_B;
 int TIMEOUT;
@@ -153,11 +146,10 @@ void A_timerinterrupt() {
 /* the following routine will be called once (only) before any other */
 /* entity A routines are called. You can use it to do any initialization */
 void A_init() {
-  state_A = available;
   buffered_messages = NULL;
   seqnum_A = 0;
   acknum_B = 0;
-  TIMEOUT = 50;
+  TIMEOUT = 10;
   WINDOWSIZE = getwinsize();
   nextseqnum = 0;
   base = 0;

@@ -36,13 +36,6 @@ struct timer {
   struct timer *next_timer;
 } * global_logical_timer;
 
-enum host_states {
-  waiting_for_acknowledgment,
-  waiting_for_packet,
-  available
-};
-
-enum host_states state_A = available;
 int seqnum_A;
 int acknum_B;
 int TIMEOUT;
@@ -258,7 +251,6 @@ void A_timerinterrupt()
 /* entity A routines are called. You can use it to do any initialization */
 void A_init()
 {
-  state_A = available;
   buffered_messages_A = NULL;
   seqnum_A = 0;
   acknum_B = 0;
